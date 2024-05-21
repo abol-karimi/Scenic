@@ -3,7 +3,7 @@ import math
 import carla
 import scipy
 
-from scenic.core.geometry import normalizeAngle
+from scenic.core.geometry import headingOfSegment, normalizeAngle
 from scenic.core.vectors import Orientation, Vector
 
 
@@ -33,11 +33,12 @@ def scenicToCarlaLocation(pos, world=None, blueprint=None, snapToGround=False):
 
 
 def scenicToCarlaRotation(orientation):
-    # CARLA uses intrinsic yaw, pitch, roll rotations (in that order), like Scenic,
-    # but with yaw being left-handed and with zero yaw being East.
-    yaw, pitch, roll = orientation.r.as_euler("ZXY", degrees=True)
-    yaw = -yaw - 90
-    return carla.Rotation(pitch=pitch, yaw=yaw, roll=roll)
+    origin = (0, 0, 0)
+    scenic_y_axis = (0, 1, 0)
+    obj_3d_heading = orientation.r.apply(scenic_y_axis)
+    scenic_yaw = headingOfSegment(origin, obj_3d_heading)
+    carla_yaw = -90 - math.degrees(scenic_yaw)
+    return carla.Rotation(pitch=0, yaw=carla_yaw, roll=0)
 
 
 def carlaToScenicPosition(loc):

@@ -173,18 +173,13 @@ behavior FollowTrajectoryBehavior(target_speed = 10, trajectory = None, turn_spe
     _lon_controller,_lat_controller = simulation().getLaneFollowingControllers(self)
     past_steer_angle = 0
     
-    if trajectory[-1].maneuvers:
-        end_intersection = trajectory[-1].maneuvers[0].intersection
-        if end_intersection == None:
-            end_intersection = trajectory[-1].centerline[-1]
-    else:
-        end_intersection = trajectory[-1].centerline[-1]
+    trajectory_end = trajectory[-1].centerline[-1]
 
     while True:
         if self in _model.network.intersectionRegion:
             do TurnBehavior(trajectory_centerline, target_speed=turn_speed)
 
-        if (distance from self to end_intersection) < distanceToEndpoint:
+        if (distance from self to trajectory_end) < distanceToEndpoint:
             break
 
         if self.speed is not None:

@@ -4,6 +4,7 @@ import math as _math
 
 import carla as _carla
 
+from scenic.core.type_support import toOrientation
 from scenic.domains.driving.actions import *
 import scenic.simulators.carla.utils.utils as _utils
 
@@ -23,6 +24,20 @@ class SetAngularVelocityAction(Action):
         yAngularVel = self.angularVel * _math.sin(obj.heading)
         newAngularVel = _utils.scalarToCarlaVector3D(xAngularVel, yAngularVel)
         obj.carlaActor.set_angular_velocity(newAngularVel)
+
+
+class SetPoseAction(Action):
+    def __init__(self, position, orientation):
+        self.position = position
+        self.orientation = toOrientation(
+            orientation, "SetPoseAction(p, o) with o not an Orientation"
+        )
+
+    def applyTo(self, obj, sim):
+        loc = _utils.scenicToCarlaLocation(self.position, z=obj.elevation)
+        rot = _utils.scenicToCarlaRotation(self.orientation)
+        transform = _carla.Transform(loc, rot)
+        obj.carlaActor.set_transform(transform)
 
 
 class SetTransformAction(Action):  # TODO eliminate
